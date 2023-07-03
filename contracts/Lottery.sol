@@ -30,7 +30,7 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     LotteryState private s_lotteryState;
     uint256 private s_lastTimeStamp;
 
-    event RaffleEnter(address indexed player);
+    event LotteryEnter(address indexed player);
     event RequestedLotteryWinner(uint256 indexed requestId);
     event WinnerPicked(address indexed winner);
 
@@ -61,7 +61,7 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
             revert Lottery__NotOpen();
         }
         s_players.push(payable(msg.sender));
-        emit RaffleEnter(msg.sender);
+        emit LotteryEnter(msg.sender);
     }
 
     function checkUpkeep(
