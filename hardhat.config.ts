@@ -1,14 +1,14 @@
 import "dotenv/config";
 import "tsconfig-paths/register";
 import { HardhatUserConfig } from "hardhat/config";
-import "hardhat-deploy";
-import "hardhat-deploy-ethers";
+import "@typechain/hardhat";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-ethers";
-import "@typechain/hardhat";
+import "@nomicfoundation/hardhat-verify";
+import "hardhat-deploy";
+import "hardhat-deploy-ethers";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
-import "@nomicfoundation/hardhat-verify";
 
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
