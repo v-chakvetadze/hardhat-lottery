@@ -66,13 +66,14 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     function checkUpkeep(
         bytes memory /*checkData*/
-    ) public override returns (bool upkeepNeeded, bytes memory /* performDAata */) {
+    ) public view override returns (bool upkeepNeeded, bytes memory /* performDAata */) {
         bool isOpen = (s_lotteryState == LotteryState.OPEN);
         bool timePassed = (block.timestamp - s_lastTimeStamp) > i_interval;
         bool hasPlayers = (s_players.length > 0);
         bool hasBalance = address(this).balance > 0;
 
         upkeepNeeded = isOpen && timePassed && hasPlayers && hasBalance;
+        return (upkeepNeeded, "0x0");
     }
 
     function performUpkeep(bytes calldata /*performData*/) external override {
@@ -144,7 +145,11 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         return s_lastTimeStamp;
     }
 
-    function getRequestConfirmations() public view returns (uint256) {
+    function getRequestConfirmations() public pure returns (uint256) {
         return REQUEST_CONFIRMATIONS;
+    }
+
+    function getInterval() public view returns (uint256) {
+        return i_interval;
     }
 }
