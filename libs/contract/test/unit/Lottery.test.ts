@@ -2,12 +2,15 @@ import { deployments, ethers, getNamedAccounts, network } from "hardhat";
 import { assert, expect } from "chai";
 import { developmentChains, networkConfig } from "../../helper-hardhat-config";
 import { Lottery } from "../../typechain-types";
-import { validateNetworkId } from "utils";
+import { validateNetworkId } from "../../utils";
 import {
     RandomWordsRequestedEvent,
     VRFCoordinatorV2Mock,
-} from "typechain-types/@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock";
-import { TypedEventLog } from "typechain-types/common";
+} from "../../typechain-types/@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock";
+import { TypedEventLog } from "../../typechain-types/common";
+
+const EVM_INCREASE_TIME = "evm_increaseTime";
+const EVM_MINE = "evm_mine";
 
 !developmentChains.includes(network.name)
     ? describe.skip
@@ -57,8 +60,8 @@ import { TypedEventLog } from "typechain-types/common";
               });
               it("doesnt allow entrance when raffle is calculating", async () => {
                   await lottery.enterLottery({ value: lotteryEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
-                  await network.provider.send("evm_mine", []);
+                  await network.provider.send(EVM_INCREASE_TIME, [Number(interval) + 1]);
+                  await network.provider.send(EVM_MINE, []);
                   await lottery.performUpkeep("0x");
                   await expect(
                       lottery.enterLottery({ value: lotteryEntranceFee })
@@ -66,43 +69,43 @@ import { TypedEventLog } from "typechain-types/common";
               });
           });
 
-          /*describe("checkUpkeep", async () => {
+          describe("checkUpkeep", async () => {
               it("returns false if people haven't sent any ETH", async () => {
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
-                  await network.provider.request({ method: "evm_mine", params: [] });
-                  const { upkeepNeeded } = await lottery.callStatic.checkUpkeep("0x");
+                  await network.provider.send(EVM_INCREASE_TIME, [Number(interval) + 1]);
+                  await network.provider.request({ method: EVM_MINE, params: [] });
+                  const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
                   assert(!upkeepNeeded);
               });
               it("returns false if lottery isn't open", async () => {
                   await lottery.enterLottery({ value: lotteryEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
-                  await network.provider.request({ method: "evm_mine", params: [] });
-                  await lottery.performUpkeep("0x"); 
+                  await network.provider.send(EVM_INCREASE_TIME, [Number(interval) + 1]);
+                  await network.provider.request({ method: EVM_MINE, params: [] });
+                  await lottery.performUpkeep("0x");
                   const lotteryState = await lottery.getLotteryState();
-                  const { upkeepNeeded } = await lottery.callStatic.checkUpkeep("0x"); 
+                  const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
                   assert.equal(lotteryState.toString() == "1", upkeepNeeded == false);
               });
               it("returns false if enough time hasn't passed", async () => {
                   await lottery.enterLottery({ value: lotteryEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) - 5]);
-                  await network.provider.request({ method: "evm_mine", params: [] });
-                  const { upkeepNeeded } = await lottery.callStatic.checkUpkeep("0x"); 
+                  await network.provider.send(EVM_INCREASE_TIME, [Number(interval) - 5]);
+                  await network.provider.request({ method: EVM_MINE, params: [] });
+                  const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
                   assert(!upkeepNeeded);
               });
               it("returns true if enough time has passed, has players, eth, and is open", async () => {
                   await lottery.enterLottery({ value: lotteryEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
-                  await network.provider.request({ method: "evm_mine", params: [] });
-                  const { upkeepNeeded } = await lottery.callStatic.checkUpkeep("0x");
+                  await network.provider.send(EVM_INCREASE_TIME, [Number(interval) + 1]);
+                  await network.provider.request({ method: EVM_MINE, params: [] });
+                  const { upkeepNeeded } = await lottery.checkUpkeep.staticCall("0x");
                   assert(upkeepNeeded);
               });
-          });*/
+          });
 
           describe("performUpkeep", async () => {
               it("it can only run if checkUpkeep is true", async () => {
                   await lottery.enterLottery({ value: lotteryEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
-                  await network.provider.send("evm_mine", []);
+                  await network.provider.send(EVM_INCREASE_TIME, [Number(interval) + 1]);
+                  await network.provider.send(EVM_MINE, []);
                   const tx = await lottery.performUpkeep("0x");
                   assert(tx);
               });
@@ -114,8 +117,8 @@ import { TypedEventLog } from "typechain-types/common";
               });
               it("updates the raffle state, emits an event and calls the VRF coordinator", async () => {
                   await lottery.enterLottery({ value: lotteryEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
-                  await network.provider.send("evm_mine", []);
+                  await network.provider.send(EVM_INCREASE_TIME, [Number(interval) + 1]);
+                  await network.provider.send(EVM_MINE, []);
                   const txResponse = await lottery.performUpkeep("0x");
                   const txReceipt = await txResponse.wait(1);
                   const lotteryState = await lottery.getLotteryState();
@@ -130,8 +133,8 @@ import { TypedEventLog } from "typechain-types/common";
           describe("fulfillRandomWords", async () => {
               beforeEach(async () => {
                   await lottery.enterLottery({ value: lotteryEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
-                  await network.provider.send("evm_mine", []);
+                  await network.provider.send(EVM_INCREASE_TIME, [Number(interval) + 1]);
+                  await network.provider.send(EVM_MINE, []);
               });
 
               it("can only be called after performUpkeer", async () => {
@@ -144,23 +147,23 @@ import { TypedEventLog } from "typechain-types/common";
                   ).to.be.revertedWith("nonexistent request");
               });
 
-              it("picks a winner, resets the lottery and sends money", async () => {
-                  const additionalEntrants = 3;
-                  const startingAccountIndex = 1;
-                  const accounts = await ethers.getSigners();
+              it("picks a winner, resets the lottery and sends money", (done) => {
+                  (async () => {
+                      const additionalEntrants = 3;
+                      const startingAccountIndex = 1;
+                      const accounts = await ethers.getSigners();
 
-                  for (
-                      let i = startingAccountIndex;
-                      i < startingAccountIndex + additionalEntrants;
-                      i++
-                  ) {
-                      const accountConnectedLottery = lottery.connect(accounts[i]);
-                      await accountConnectedLottery.enterLottery({ value: lotteryEntranceFee });
-                  }
+                      for (
+                          let i = startingAccountIndex;
+                          i < startingAccountIndex + additionalEntrants;
+                          i++
+                      ) {
+                          const accountConnectedLottery = lottery.connect(accounts[i]);
+                          await accountConnectedLottery.enterLottery({ value: lotteryEntranceFee });
+                      }
 
-                  const startingTimeStamp = await lottery.getLatestTimeStamp();
+                      const startingTimeStamp = await lottery.getLatestTimeStamp();
 
-                  await new Promise<void>(async (resolve, reject) => {
                       const evt = await lottery.getEvent("WinnerPicked");
                       await lottery.once(evt, async () => {
                           try {
@@ -168,25 +171,29 @@ import { TypedEventLog } from "typechain-types/common";
                               const lotteryState = await lottery.getLotteryState();
                               const endingTimeStamp = await lottery.getLatestTimeStamp();
                               const numPlayers = await lottery.getNumberOfPlayers();
-                              //   const winnerEndingBalance = await accounts[1].getBalance();
 
+                              const winnerIndex = accounts.findIndex(
+                                  (i) => i.address === recentWinner
+                              );
+
+                              const winnerStartingBalance = startBalancesArray[winnerIndex];
+                              const winnerEndingBalance = await ethers.provider.getBalance(
+                                  accounts[winnerIndex].address
+                              );
+                              assert(winnerIndex >= 0);
                               assert(Number(numPlayers) === 0);
                               assert(Number(lotteryState) === 0);
                               assert(endingTimeStamp > startingTimeStamp);
-                              //   assert.equal(
-                              //       winnerEndingBalance.toString(),
-                              //       winnerStartingBalance.add(
-                              //           raffleEntranceFee
-                              //               .mul(additionalEntrants)
-                              //               .add(lotteryEntranceFee)
-                              //               .toString()
-                              //       )
-                              //   );
-                              resolve();
+                              const winnerEndingBalanceCalculated =
+                                  winnerStartingBalance +
+                                  lotteryEntranceFee +
+                                  lotteryEntranceFee * BigInt(additionalEntrants);
+                              assert(winnerEndingBalance === winnerEndingBalanceCalculated);
+
+                              done();
                           } catch (e) {
-                              reject(e);
+                              done(e);
                           }
-                          
                       });
 
                       const tx = await lottery.performUpkeep("0x");
@@ -195,9 +202,12 @@ import { TypedEventLog } from "typechain-types/common";
                           txReceipt?.logs[1] as TypedEventLog<RandomWordsRequestedEvent.Event>
                       ).args;
                       const address = await lottery.getAddress();
-                      //const winnerStartingBalance=await accounts[1].getBalance();
+
+                      const startBalancesArray = await Promise.all(
+                          accounts.map((a) => ethers.provider.getBalance(a.address))
+                      );
                       await vrfCoordinatorV2Mock.fulfillRandomWords(requestId, address);
-                  });
+                  })();
               });
           });
       });

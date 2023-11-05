@@ -8,6 +8,8 @@ import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 
+import { alchemyApiKey } from "./webConfig";
+
 const walletConnectProjectId = " ";
 
 const useLocalhost = true;
@@ -15,20 +17,17 @@ const useLocalhost = true;
 const chain = useLocalhost ? hardhat : sepolia;
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [/*mainnet,*/ chain],
-  useLocalhost
-    ? [publicProvider()]
-    : [
-        alchemyProvider({ apiKey: "wJae-Qt5h2neKdCAg88Jcu5RYlSXc3aI" }),
-        publicProvider(),
-      ]
+    [/*mainnet,*/ chain],
+    useLocalhost
+        ? [publicProvider()]
+        : [alchemyProvider({ apiKey: alchemyApiKey }), publicProvider()]
 );
 
 export const config = createConfig({
-  autoConnect: true,
-  connectors: [
-    new MetaMaskConnector({ chains }),
-    /*new CoinbaseWalletConnector({
+    autoConnect: true,
+    connectors: [
+        new MetaMaskConnector({ chains }),
+        /*new CoinbaseWalletConnector({
       chains,
       options: {
         appName: "wagmi",
@@ -47,7 +46,7 @@ export const config = createConfig({
         shimDisconnect: true,
       },
     }),*/
-  ],
-  publicClient,
-  webSocketPublicClient,
+    ],
+    publicClient,
+    webSocketPublicClient,
 });

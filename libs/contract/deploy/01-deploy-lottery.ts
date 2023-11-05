@@ -21,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     validateNetworkId(chainId);
 
     let vrfCoordinatorV2Address,
-        subscriptionId: bigint = BigInt(0);
+        subscriptionId = BigInt(0);
     if (isDevChain) {
         const vrfCoordinatorV2Mock = await ethers.getContract<VRFCoordinatorV2Mock>(
             "VRFCoordinatorV2Mock"
@@ -38,6 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, VRF_SUB_FUND_AMOUNT);
     } else {
         vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2;
+        subscriptionId = BigInt(networkConfig[chainId].subscriptionId || 0);
     }
 
     const entranceFee = networkConfig[chainId].entranceFee;

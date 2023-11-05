@@ -1,23 +1,30 @@
 {
-  "name": "contract",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/contract",
-  "projectType": "library",
-  "targets": {
-    "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["contract/**/*.ts"]
-      }
+    "name": "contract",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/contract",
+    "projectType": "library",
+    "targets": {
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": ["{options.outputFile}"],
+            "options": {
+                "lintFilePatterns": ["contract/**/*.ts"]
+            }
+        },
+        "hardhat": {
+            "executor": "nx:run-commands",
+            "options": {
+                "cwd": "libs/contract",
+                "commands": ["npx hardhat"]
+            }
+        },
+        "hardhat-node": {
+            "executor": "nx:run-commands",
+            "options": {
+                "cwd": "libs/contract",
+                "commands": ["npx hardhat node"]
+            }
+        }
     },
-    "hardhat": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "libs/contract",
-        "commands": ["npx hardhat"]
-      }
-    }
-  },
-  "tags": []
+    "tags": []
 }

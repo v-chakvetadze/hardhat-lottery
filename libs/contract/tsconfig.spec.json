@@ -5,11 +5,5 @@
         "declaration": true,
         "types": ["node"]
     },
-    "include": [
-        "@types",
-        "hardhat.config.ts",
-        "deploy/**/*.ts",
-        "scripts/**/*.ts",
-        "utils/**/*.ts"
-    ]
+    "include": ["@types", "hardhat.config.ts", "test/**/*.ts"]
 }
